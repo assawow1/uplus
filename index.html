@@ -1,858 +1,396 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U+One 체험 가이드</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
-  <style>
-    body {
-      box-sizing: border-box;
-      margin: 0;
-      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
-      background: #f9fafb;
-      color: #333;
-      font-size: 14px;
-    }
-    html, body, #wrapper {
-      height: 100%;
-      width: 100%;
-    }
-    button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    #wrapper {
-      max-width: 100%;
-      min-height: 100%;
-      background: #fff;
-      overflow-y: auto;
-    }
-    #header {
-      position: sticky;
-      top: 0;
-      background: #fff;
-      padding: 16px;
-      border-bottom: 1px solid #eee;
-      z-index: 10;
-    }
-    #title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .logo {
-      color: #E6007E;
-      font-weight: 900;
-      font-size: 20px;
-    }
-    .title-text {
-      font-weight: 700;
-      font-size: 18px;
-    }
-    .source-text {
-      font-size: 11px;
-      color: #999;
-      margin-top: 4px;
-      font-weight: 400;
-    }
-    #controls {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .btn-control {
-      background: #f1f3f5;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 12px;
-      color: #555;
-      transition: all 0.2s;
-    }
-    .btn-control:hover {
-      background: #e9ecef;
-    }
-    #search-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background: #f8f9fa;
-      box-sizing: border-box;
-      font-size: 18px;
-      transition: border-color 0.2s;
-    }
-    #search-input:focus {
-      outline: none;
-      border-color: #E6007E;
-      background: #fff;
-    }
-    #list-container {
-      padding: 12px;
-    }
-    .section {
-      margin-bottom: 12px;
-      border: 1px solid #eee;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .section-header {
-      background: linear-gradient(135deg, #E6007E, #FF6B9D);
-      color: #fff;
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 15px;
-    }
-    .section-header:hover {
-      background: linear-gradient(135deg, #d1006f, #ff5a8d);
-    }
-    .section-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-    .section-body.open {
-      max-height: 5000px;
-    }
-    .question {
-      border-bottom: 1px solid #f5f5f5;
-    }
-    .question:last-child {
-      border-bottom: none;
-    }
-    .question-header {
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .question-header:hover {
-      background: #fff0f6;
-    }
-    .question-title {
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .question-title .q-mark {
-      color: #E6007E;
-      font-weight: 700;
-    }
-    .question-icon {
-      font-size: 10px;
-      color: #999;
-      transition: transform 0.2s;
-    }
-    .question-body {
-      max-height: 0;
-      overflow: hidden;
-      background: #fafafa;
-      padding: 0 16px;
-      transition: all 0.2s ease;
-    }
-    .question-body.open {
-      max-height: 120px;
-      padding: 14px 16px;
-    }
-    .action-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-    .btn {
-      text-decoration: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: #fff;
-      background: #E6007E;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-    .btn:hover {
-      background: #d1006f;
-      transform: translateY(-1px);
-    }
-    .btn-gray {
-      background: #6c757d;
-      color: #fff;
-    }
-    .btn-gray:hover {
-      background: #5a6268;
-    }
-    .preparing {
-      color: #999;
-      font-size: 12px;
-      font-style: italic;
-    }
-    #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(0,0,0,0.8);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 24px;
-      font-size: 13px;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      z-index: 100;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .hidden {
-      display: none !important;
-    }
-    .no-results {
-      text-align: center;
-      padding: 40px 20px;
-      color: #999;
-    }
-    .no-results-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-    #install-section {
-      margin: 20px 12px;
-      padding: 20px;
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-      border-radius: 12px;
-      border: 2px dashed #dee2e6;
-      text-align: center;
-    }
-    #install-section h3 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-      color: #333;
-    }
-    #install-section p {
-      margin: 0 0 16px 0;
-      font-size: 13px;
-      color: #666;
-      line-height: 1.5;
-    }
-    .install-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .btn-install {
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-install.ios {
-      background: linear-gradient(135deg, #007AFF, #0051D5);
-    }
-    .btn-install.ios:hover {
-      background: linear-gradient(135deg, #0051D5, #003DA5);
-      transform: translateY(-2px);
-    }
-    .btn-install.android {
-      background: linear-gradient(135deg, #34A853, #0F9D58);
-    }
-    .btn-install.android:hover {
-      background: linear-gradient(135deg, #0F9D58, #0D8C4F);
-      transform: translateY(-2px);
-    }
-    .install-icon {
-      font-size: 18px;
-    }
-    #install-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    #install-modal.show {
-      display: flex;
-    }
-    .modal-content {
-      background: #fff;
-      border-radius: 16px;
-      max-width: 400px;
-      width: 100%;
-      max-height: 80%;
-      overflow-y: auto;
-      position: relative;
-    }
-    .modal-header {
-      padding: 20px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-header h3 {
-      margin: 0;
-      font-size: 18px;
-      color: #333;
-    }
-    .modal-close {
-      background: #f1f3f5;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .modal-close:hover {
-      background: #e9ecef;
-      color: #333;
-    }
-    .modal-body {
-      padding: 20px;
-    }
-    .install-step {
-      margin-bottom: 20px;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #E6007E;
-    }
-    .install-step:last-child {
-      margin-bottom: 0;
-    }
-    .step-number {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      background: #E6007E;
-      color: #fff;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 24px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-right: 8px;
-    }
-    .step-title {
-      font-weight: 600;
-      font-size: 14px;
-      color: #333;
-      margin-bottom: 8px;
-    }
-    .step-desc {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.6;
-      margin-left: 32px;
-    }
-    .step-icon {
-      font-size: 20px;
-      margin: 0 4px;
-    }
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
- </head>
- <body>
-  <div id="wrapper">
-   <div id="header">
-    <div id="title-row">
-     <div>
-      <div><span class="logo">U+</span><span class="title-text" id="app-title">one 사용 가이드</span>
-      </div>
-      <div class="source-text">
-       [호남 영업 연구소]
-      </div>
-     </div>
-    </div>
-    <div id="controls"><button class="btn-control" onclick="toggleAll(true)">+ 전체열기</button> <button class="btn-control" onclick="toggleAll(false)">- 전체닫기</button>
-    </div><input id="search-input" placeholder="검색 (예: 요금)" onkeyup="filterContent()">
-   </div>
-   <div id="list-container"></div>
-   <div id="no-results" class="no-results hidden">
-    <div class="no-results-icon">
-     🔍
-    </div>
-    <div>
-     검색 결과가 없습니다
-    </div>
-   </div>
-   <div id="install-section">
-    <h3>📱 홈 화면에 추가하기</h3>
-    <p>U+One 사용 가이드를 홈 화면에 추가하고<br>
-     앱처럼 빠르게 접속하세요!</p>
-    <div class="install-buttons"><button class="btn-install ios" onclick="showInstallGuide('ios')"> <span class="install-icon">🍎</span> <span>iPhone 추가</span> </button> <button class="btn-install android" onclick="showInstallGuide('android')"> <span class="install-icon">🤖</span> <span>Android 추가</span> </button>
-    </div>
-   </div>
-  </div>
-  <div id="install-modal">
-   <div class="modal-content">
-    <div class="modal-header">
-     <h3 id="modal-title">홈 화면에 추가</h3>
-     <div class="modal-close" onclick="closeInstallGuide()">
-      ×
-     </div>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-   </div>
-  </div>
-  <div id="toast">
-   링크가 복사되었습니다
-  </div>
-  <script>
-    const defaultConfig = {
-      app_title: 'one 사용 가이드',
-      search_placeholder: '검색 (예: 요금)',
-      primary_color: '#E6007E',
-      secondary_color: '#FF6B9D',
-      background_color: '#ffffff',
-      text_color: '#333333',
-      surface_color: '#f8f9fa'
-    };
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGU+ 멀티라인 견적서 (이미지 요금제 반영)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f7;
+            padding-bottom: 80px;
+        }
 
-    const data = [
-      {
-        title: "💰 요금 조회 및 납부 관리",
-        items: [
-          ["실시간 요금을 확인하고 싶어요", "bhKDRixKUec?si=AXPMMoSVzpJa1hAg"],
-          ["이번 달 청구요금과 납부 방법이 궁금해요", "bQ1SZMZR54M?si=KFyJNEcti3X7Oz7j"],
-          ["입금전용계좌로 요금을 납부하고 싶어요", "KyFnJQU3QMY?si=qD8kCTBOMzxG_DJ5"],
-          ["미납요금을 납부하고 싶어요", "xPl9uD2dF_g?si=kJzD69PZgWQDaZBG"],
-          ["다른 사람 명의의 카드로 요금을 납부하고 싶어요", "EjOcf-aQQP4?si=XksPe6paY4VhpBU3"],
-          ["자동이체 변경 방법과 청구지 변경 방법이 궁금해요", "HlHr8Z0HM7A?si=Je7VeFBhdEd2SaQE"],
-          ["결제일 변경 방법이 궁금해요", "lBd6QAcL_og?si=QkIm5CoovyHCliYK"],
-          ["선택약정 할인반환금을 확인하는 방법이 궁금해요", "TOUos9Iyz0g?si=bclZBCxVGcx2fXdZ"]
-        ]
-      },
-      {
-        title: "📱 데이터, 요금제, 로밍",
-        items: [
-          ["사용 중인 요금제와 부가서비스가 궁금해요", "-LPHSD1PEQk?si=wTC_Re4E6VWrseJW"],
-          ["휴대폰 데이터 사용량 확인 방법과 U+데이터 상품권 등록 방법이 궁금해요", "bnW-a__BGIc?si=xFzk3O8dPaGJ_pP5"],
-          ["내 데이터를 가족 친구에게 나눠주고 싶어요", "YNMjF24083c?si=u4xZtCRPvwwN2sHH"],
-          ["로밍 서비스를 신청하고 싶어요", "hzkbklYEm4I?si=WcTiPM-EBliLTaTl"]
-        ]
-      },
-      {
-        title: "🔗 결합 상품 및 할인",
-        items: [
-          ["결합 상품을 다른 결합으로 변경하고 싶어요", "IU8U79c5A1E?si=KfGRgKoqzjWL3J6x"],
-          ["할인 나눔을 변경하고 싶어요", "FuwXinCJQvk?si=iuV1T7FZrReY4whR"],
-          ["셀프 결합을 신청하고 싶어요", "WkFMoW7ULN8?si=N1m0TTIVeX2eVRIE"],
-          ["셀프 결합으로 가족을 추가하고 싶어요", "YpCeq-9_X2Y?si=RvDgj9PCNMOIZtUJ"]
-        ]
-      },
-      {
-        title: "🏠 홈 서비스 (인터넷/TV)",
-        items: [
-          ["홈 상품 사용내역을 알고 싶어요", "s77t2tV71CE?si=d0egICusuxepOuKB"],
-          ["홈 상품 개통 설치 가능 지역을 확인하고 싶어요", "pixD_1Kc6hE?si=It2CUm8DC50K3ULb"],
-          ["TV나 인터넷 설치 장소를 변경하고 싶어요", "CzKAUTS9a2I?si=p2n6Ae_KHsZzL2RS"]
-        ]
-      },
-      {
-        title: "💳 휴대폰 소액결제",
-        items: [
-          ["U+휴대폰결제 이용 한도를 변경하고 싶어요", "y_dbJT2nY5c?si=1tqhVsGv0RGGkQ_a"],
-          ["U+휴대폰결제를 선결제로 이용하고 싶어요", "_z_VspdFnKk?si=A7GdpEP-0eYL64iP"]
-        ]
-      },
-      {
-        title: "📄 서류 발급",
-        items: [
-          ["가입확인서를 발급하는 방법이 궁금해요", "eiynh9tP6Ps?si=2pT3iyisF_enVXt2"],
-          ["납부확인서, 세금계산서 신청 및 청구서 재발행 방법이 궁금해요", "zqXNGL63zRo?si=L1kUAvgEBejH-WW0"]
-        ]
-      },
-      {
-        title: "💎 멤버십 혜택",
-        items: [
-          ["VIP콕 무료영화 예매혜택을 이용하고 싶어요", "RXD5C-cHAhg?si=KeB5UDOI432KQsWL"]
-        ]
-      }
-    ];
+        .text-uplus { color: #E6007E; }
+        .bg-uplus { background-color: #E6007E; }
+        .border-uplus { border-color: #E6007E; }
+        .hover-bg-uplus:hover { background-color: #C5006C; }
 
-    function initializeList() {
-      const container = document.getElementById('list-container');
-      let html = '';
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; }
+            .shadow-lg { box-shadow: none !important; }
+            .print-border { border: 1px solid #ddd !important; }
+            .bg-uplus { background-color: #E6007E !important; -webkit-print-color-adjust: exact; }
+            .text-white { color: white !important; -webkit-print-color-adjust: exact; }
+            .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
+        }
 
-      data.forEach((section, sIndex) => {
-        let questionsHtml = '';
-        section.items.forEach((item, qIndex) => {
-          const hasVideo = item[1] && item[1].length > 0;
-          const buttons = hasVideo
-            ? `<a href="https://youtu.be/${item[1]}" target="_blank" rel="noopener noreferrer" class="btn">▶ 보기</a>
-               <button onclick="copyLink('${item[1]}')" class="btn btn-gray">🔗 공유</button>`
-            : `<span class="preparing">준비중</span>`;
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
 
-          questionsHtml += `
-            <div class="question" data-search="${item[0].toLowerCase()}">
-              <div class="question-header" onclick="toggleQuestion(this)">
-                <div class="question-title">
-                  <span class="q-mark">Q.</span>
-                  <span>${item[0]}</span>
+        .free-row { color: #E6007E; font-weight: bold; }
+
+        /* 플로팅 캡쳐 버튼 */
+        .capture-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(230, 0, 126, 0.3);
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <button onclick="window.print()" class="no-print capture-btn bg-uplus text-white px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+            <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+        </svg>
+        견적서 캡쳐
+    </button>
+
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 print-border">
+        <!-- 헤더 -->
+        <div class="bg-uplus p-8 text-white flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="20" fill="white"/>
+                    <path d="M12 15V22C12 25.3137 14.6863 28 18 28H22C25.3137 28 28 25.3137 28 22V15H25V22C25 23.6569 23.6569 25 22 25H18C16.3431 25 15 23.6569 15 22V15H12Z" fill="#E6007E"/>
+                    <rect x="23" y="12" width="5" height="3" rx="1" fill="#E6007E"/>
+                </svg>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight uppercase">LG Uplus</h1>
+                    <p class="text-pink-100 text-xs opacity-80 uppercase tracking-widest">Business Solution Estimate</p>
                 </div>
-                <span class="question-icon">▼</span>
-              </div>
-              <div class="question-body">
-                <div class="action-buttons">${buttons}</div>
-              </div>
             </div>
-          `;
+            <div class="text-right">
+                <div class="flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full">
+                    <span class="text-xs text-pink-100">발행일자:</span>
+                    <input type="date" id="docDate" class="bg-transparent border-none outline-none text-white text-sm font-semibold" value="2026-04-01">
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <!-- 조건 선택 섹션 -->
+            <div class="no-print mb-10 p-7 bg-slate-50 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-4 border-b border-slate-200 pb-2 mb-2">
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-1.5 h-4 bg-uplus rounded-full"></span>
+                        견적 옵션 설정 (이미지 요금제 적용)
+                    </h2>
+                </div>
+                
+                <div class="col-span-1">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">약정 기간</label>
+                    <select id="contract" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm">
+                        <option value="3">3년 약정</option>
+                        <option value="5" selected>5년 약정</option>
+                    </select>
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">인터넷 종류</label>
+                    <select id="internet" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm">
+                        <option value="기가Slim" selected>기가Slim (500M)</option>
+                        <option value="광랜">광랜 (100M)</option>
+                        <option value="기가1G">기가 1G</option>
+                    </select>
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">TV 상품</label>
+                    <select id="tv" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm">
+                        <option value="기본형" selected>기본형 (223개)</option>
+                        <option value="실속형">실속형 (217개)</option>
+                    </select>
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">총 회선수 (TV)</label>
+                    <input type="number" id="tvTotal" value="15" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm font-bold text-uplus">
+                </div>
+
+                <div class="md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-200 pt-4 mt-2">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="freeWifi" class="w-4 h-4 accent-uplus cursor-pointer" checked>
+                        <label for="freeWifi" class="text-xs text-slate-600 cursor-pointer font-bold text-uplus">WIFI 무료 정책 적용</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="freeUHD3" class="w-4 h-4 accent-uplus cursor-pointer" checked>
+                        <label for="freeUHD3" class="text-xs text-slate-600 cursor-pointer font-bold text-uplus">UHD3셋탑 무료 정책 적용</label>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="inline-block text-[11px] font-bold text-slate-400 uppercase mb-1 mr-2">시설/상품권 기준:</label>
+                        <select id="facility" class="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs focus:ring-2 focus:ring-uplus outline-none">
+                            <option value="모텔">모텔</option>
+                            <option value="원룸">원룸</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 요금 상세 내역 -->
+            <div class="mb-4 flex justify-between items-end">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    ■ 요금
+                    <span class="text-xs font-normal text-slate-400 ml-2">| 총회선수: <span id="displayTotalLines" class="font-bold text-uplus">15</span></span>
+                </h3>
+                <span class="text-xs text-slate-400">단위: 원 (VAT 별도)</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm mb-8">
+                <table class="w-full text-sm text-left border-collapse">
+                    <thead class="text-[11px] text-slate-600 uppercase bg-slate-50 border-b border-slate-300">
+                        <tr>
+                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-32">구분</th>
+                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-40">상품명</th>
+                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300">규격 및 사양</th>
+                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-24">수량 (입력)</th>
+                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-32">단가금액</th>
+                            <th class="px-4 py-3 font-bold text-center w-36">최종금액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="priceTable" class="divide-y divide-slate-200 text-slate-700">
+                        <!-- JS에서 데이터 렌더링 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 하단 정보 영역: 사은품/특이사항 및 합계 -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                
+                <!-- 왼쪽: 사은품 및 특이사항 -->
+                <div class="md:col-span-7 flex flex-col">
+                    <div class="border-t-2 border-slate-800 pt-4 mb-2">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            ■ 사은품 및 특이사항
+                        </h3>
+                    </div>
+                    <div class="flex-grow p-5 bg-slate-50 rounded-xl border border-slate-200">
+                        <p id="contractBasis" class="text-sm font-bold text-slate-800 border-b border-slate-300 pb-2 mb-4">5년 약정 기준</p>
+                        <ul class="text-xs text-slate-700 space-y-3 mb-6">
+                            <li class="flex items-start gap-2">
+                                <span class="text-uplus font-bold mt-0.5">•</span>
+                                <span>LG유플러스 광케이블 공사료 및 설치비 전액 면제 (최소 200만원)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-uplus font-bold mt-0.5">•</span>
+                                <span>넷플릭스 지원가능한 UHD 셋탑 무료 정책 적용</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-uplus font-bold mt-0.5">•</span>
+                                <span>통합리모컨 객실 당 제공</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-uplus font-bold mt-0.5">•</span>
+                                <span>전 객실 기가와이파이 제공 및 본사 AS 가능</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-auto pt-6 border-t border-slate-200">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-slate-800 uppercase tracking-tighter">LG U+ 특별 지원금</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span id="voucherTotal" class="text-3xl font-black text-red-600">0</span>
+                                    <span class="text-lg font-bold text-red-600">원</span>
+                                    <span class="text-[11px] text-slate-500 font-medium ml-2 tracking-tight">지급 (신세계 or 홈플러스 상품권)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 합계 영역 -->
+                <div class="md:col-span-5 flex flex-col">
+                    <div class="border-t-2 border-slate-800 pt-4 mb-2">
+                         <h3 class="text-lg font-bold text-slate-900">■ 총 합계 요금</h3>
+                    </div>
+                    <div class="flex-grow bg-slate-800 p-8 rounded-xl text-white shadow-lg flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center py-3 border-b border-white/10 mb-4">
+                                <span class="text-slate-400 text-sm font-medium">월 이용료 (VAT 별도)</span>
+                                <span id="subtotal" class="text-xl font-bold">0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-white/10">
+                                <span class="text-slate-400 text-sm font-medium">부가가치세 (10%)</span>
+                                <span id="vatTotal" class="text-xl font-bold">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <div class="text-right mb-2">
+                                <span class="inline-block bg-uplus text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">VAT 포함 총 납부액</span>
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <span class="text-sm font-medium text-slate-400 mb-2">최종금액</span>
+                                <div class="text-right">
+                                    <span id="total" class="text-5xl font-black text-white tracking-tighter">0</span>
+                                    <span class="text-lg font-bold text-pink-400 ml-1">원</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 border-t border-slate-100 p-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-slate-400">
+            <p>© LG Uplus Corp. All rights reserved.</p>
+            <p class="font-medium text-slate-500">본 견적서는 상담용이며, 실제 개통 환경에 따라 변동될 수 있습니다.</p>
+        </div>
+    </div>
+
+    <script>
+        const priceDB = {
+            "3": {
+                internet: {
+                    "광랜": { price: 25000, desc: "100Mbps 속도의 광랜망의 기본 서비스" },
+                    "기가Slim": { price: 30000, desc: "500Mbps 기가속도의 안정적인 서비스" },
+                    "기가1G": { price: 35000, desc: "1Gbps 기가속도의 가장 빠른 서비스" }
+                },
+                tv: {
+                    "실속형": { main: 12000, sub: 7000, desc: "217개 채널" },
+                    "기본형": { main: 13000, sub: 7500, desc: "223개 채널" }
+                }
+            },
+            "5": {
+                internet: {
+                    "광랜": { price: 20000, desc: "100Mbps 속도의 광랜망의 기본 서비스" },
+                    "기가Slim": { price: 25000, desc: "500Mbps 기가속도의 안정적인 서비스" },
+                    "기가1G": { price: 30000, desc: "1Gbps 기가속도의 가장 빠른 서비스" }
+                },
+                tv: {
+                    "실속형": { main: 10000, sub: 6000, desc: "217개 채널" },
+                    "기본형": { main: 11000, sub: 6500, desc: "223개 채널" }
+                }
+            },
+            equipment: {
+                "WIFI": { price: 1000, desc: "보안이 강화된 정품 통합형 WIFI (무료정책)" },
+                "구글셋탑": { price: 1000, desc: "국내최초 구글이 들어간 셋탑" },
+                "UHD3셋탑": { price: 3000, desc: "UHD화질과 넷플릭스, 유튜브 등 OTT 지원" }
+            },
+            voucherDB: {
+                "3": {
+                    "광랜": { "모텔": 200000, "원룸": 180000 },
+                    "기가Slim": { "모텔": 230000, "원룸": 210000 },
+                    "기가1G": { "모텔": 240000, "원룸": 220000 }
+                },
+                "5": {
+                    "광랜": { "모텔": 250000, "원룸": 230000 },
+                    "기가Slim": { "모텔": 280000, "원룸": 260000 },
+                    "기가1G": { "모텔": 290000, "원룸": 270000 }
+                }
+            }
+        };
+
+        function updateTable() {
+            const contract = document.getElementById('contract').value;
+            const internetType = document.getElementById('internet').value;
+            const tvType = document.getElementById('tv').value;
+            const tvTotal = parseInt(document.getElementById('tvTotal').value) || 0;
+            const facilityType = document.getElementById('facility').value;
+            
+            const freeWifi = document.getElementById('freeWifi').checked;
+            const freeUHD3 = document.getElementById('freeUHD3').checked;
+
+            const internetQty = Math.ceil(tvTotal / 8); 
+            const tvMainQty = internetQty; 
+            const tvSubQty = Math.max(0, tvTotal - tvMainQty);
+
+            document.getElementById('displayTotalLines').innerText = tvTotal;
+            document.getElementById('contractBasis').innerText = contract + "년 약정 기준";
+
+            const tbody = document.getElementById('priceTable');
+            tbody.innerHTML = ""; 
+
+            let subtotal = 0;
+
+            // 1. 인터넷
+            const internetData = priceDB[contract].internet[internetType];
+            const internetAmount = internetQty * internetData.price;
+            subtotal += internetAmount;
+            tbody.innerHTML += createRow(`멀티라인(1:8) ${contract}년`, `${internetType} 인터넷`, internetData.desc, internetQty, internetData.price, internetAmount);
+
+            // 2. TV 주
+            const tvData = priceDB[contract].tv[tvType];
+            const tvMainAmount = tvMainQty * tvData.main;
+            subtotal += tvMainAmount;
+            tbody.innerHTML += createRow(`멀티라인(1:8) ${contract}년`, `${tvType} / 주`, tvData.desc, tvMainQty, tvData.main, tvMainAmount);
+
+            // 3. TV 부
+            const tvSubAmount = tvSubQty * tvData.sub;
+            subtotal += tvSubAmount;
+            tbody.innerHTML += createRow(`멀티라인(1:8) ${contract}년`, `${tvType} / 부`, tvData.desc, tvSubQty, tvData.sub, tvSubAmount);
+
+            // 4. 장비
+            const wifiData = priceDB.equipment["WIFI"];
+            let wifiAmount = internetQty * wifiData.price;
+            if (freeWifi) wifiAmount = 0; 
+            subtotal += wifiAmount;
+            tbody.innerHTML += createRow(`장비 3년약정`, `WIFI`, wifiData.desc, internetQty, wifiData.price, wifiAmount, freeWifi);
+
+            const settopData = priceDB.equipment["UHD3셋탑"];
+            let settopAmount = tvTotal * settopData.price;
+            if (freeUHD3) settopAmount = 0; 
+            subtotal += settopAmount;
+            tbody.innerHTML += createRow(`장비 3년약정`, `UHD3셋탑`, settopData.desc, tvTotal, settopData.price, settopAmount, freeUHD3);
+
+            const vat = Math.floor(subtotal * 0.1);
+            const grandTotal = subtotal + vat;
+
+            document.getElementById('subtotal').innerText = subtotal.toLocaleString();
+            document.getElementById('vatTotal').innerText = vat.toLocaleString();
+            document.getElementById('total').innerText = grandTotal.toLocaleString();
+
+            const voucherBase = priceDB.voucherDB[contract][internetType][facilityType];
+            const totalVoucher = voucherBase * tvTotal;
+            document.getElementById('voucherTotal').innerText = totalVoucher.toLocaleString();
+        }
+
+        function createRow(category, productName, spec, qty, unitPrice, amount, isFree = false) {
+            const amountStr = isFree ? `<span class="free-row">무료</span>` : amount.toLocaleString();
+            return `
+                <tr>
+                    <td class="px-4 py-4 text-center border-r border-slate-200 text-slate-500 text-[10px] leading-tight">${category}</td>
+                    <td class="px-4 py-4 border-r border-slate-200 font-bold text-slate-700">${productName}</td>
+                    <td class="px-4 py-4 border-r border-slate-200 text-slate-500 text-[10px] leading-relaxed">${spec}</td>
+                    <td class="px-4 py-4 text-center border-r border-slate-200 font-bold text-slate-800">${qty.toLocaleString()}</td>
+                    <td class="px-4 py-4 text-right border-r border-slate-200 text-slate-600 font-medium">${unitPrice.toLocaleString()}</td>
+                    <td class="px-4 py-4 text-right font-bold text-slate-900">${amountStr}</td>
+                </tr>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTable();
+            const inputs = ['contract', 'internet', 'tv', 'tvTotal', 'facility', 'freeWifi', 'freeUHD3'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', updateTable);
+                    if (el.tagName === 'INPUT') el.addEventListener('input', updateTable);
+                }
+            });
         });
-
-        html += `
-          <div class="section" data-search="${section.title.toLowerCase()}">
-            <div class="section-header" onclick="toggleSection(this)">
-              <span>${section.title}</span>
-              <span style="font-size: 12px;">▼</span>
-            </div>
-            <div class="section-body">${questionsHtml}</div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function toggleSection(header) {
-      const body = header.nextElementSibling;
-      const isOpen = body.classList.contains('open');
-      
-      document.querySelectorAll('.section-body.open').forEach(openBody => {
-        if (openBody !== body) {
-          openBody.classList.remove('open');
-          openBody.previousElementSibling.lastElementChild.textContent = '▼';
-        }
-      });
-      
-      body.classList.toggle('open');
-      header.lastElementChild.textContent = isOpen ? '▼' : '▲';
-    }
-
-    function toggleQuestion(header) {
-      const body = header.nextElementSibling;
-      const icon = header.querySelector('.question-icon');
-      const isOpen = body.classList.contains('open');
-
-      const section = header.closest('.section-body');
-      section.querySelectorAll('.question-body.open').forEach(openBody => {
-        if (openBody !== body) {
-          openBody.classList.remove('open');
-          openBody.previousElementSibling.querySelector('.question-icon').textContent = '▼';
-        }
-      });
-
-      body.classList.toggle('open');
-      icon.textContent = isOpen ? '▼' : '▲';
-    }
-
-    function toggleAll(open) {
-      document.querySelectorAll('.section-body').forEach(body => {
-        if (open) {
-          body.classList.add('open');
-          body.previousElementSibling.lastElementChild.textContent = '▲';
-        } else {
-          body.classList.remove('open');
-          body.previousElementSibling.lastElementChild.textContent = '▼';
-        }
-      });
-
-      if (!open) {
-        document.querySelectorAll('.question-body').forEach(body => {
-          body.classList.remove('open');
-          body.previousElementSibling.querySelector('.question-icon').textContent = '▼';
-        });
-      }
-    }
-
-    function filterContent() {
-      const query = document.getElementById('search-input').value.toLowerCase().trim();
-      const sections = document.querySelectorAll('.section');
-      let hasResults = false;
-
-      sections.forEach(section => {
-        const questions = section.querySelectorAll('.question');
-        let sectionHasMatch = false;
-
-        questions.forEach(question => {
-          const searchText = question.dataset.search;
-          const matches = query === '' || searchText.includes(query);
-          question.style.display = matches ? '' : 'none';
-          if (matches) sectionHasMatch = true;
-        });
-
-        const sectionTitle = section.dataset.search;
-        const titleMatches = query === '' || sectionTitle.includes(query);
-
-        if (titleMatches || sectionHasMatch) {
-          section.style.display = '';
-          hasResults = true;
-          if (query !== '' && sectionHasMatch) {
-            section.querySelector('.section-body').classList.add('open');
-            section.querySelector('.section-header').lastElementChild.textContent = '▲';
-          }
-        } else {
-          section.style.display = 'none';
-        }
-      });
-
-      document.getElementById('no-results').classList.toggle('hidden', hasResults || query === '');
-    }
-
-    function copyLink(videoId) {
-      const url = `https://youtu.be/${videoId}`;
-      navigator.clipboard.writeText(url).then(() => {
-        showToast('링크가 복사되었습니다');
-      }).catch(() => {
-        showToast('복사에 실패했습니다');
-      });
-    }
-
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2000);
-    }
-
-    function showInstallGuide(platform) {
-      const modal = document.getElementById('install-modal');
-      const modalTitle = document.getElementById('modal-title');
-      const modalBody = document.getElementById('modal-body');
-      
-      if (platform === 'ios') {
-        modalTitle.textContent = '🍎 iPhone 홈 화면에 추가';
-        modalBody.innerHTML = `
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">1</span>
-              Safari 브라우저 열기
-            </div>
-            <div class="step-desc">
-              iPhone에서 <strong>Safari 브라우저</strong>로 이 페이지를 열어주세요.<br>
-              (Chrome이나 다른 브라우저에서는 홈 화면 추가가 지원되지 않습니다)
-            </div>
-          </div>
-          
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">2</span>
-              공유 버튼 탭하기
-            </div>
-            <div class="step-desc">
-              화면 하단의 <span class="step-icon">⬆️</span> <strong>공유 버튼</strong>을 탭해주세요.<br>
-              (화면 중앙에 네모 안에 위쪽 화살표가 있는 아이콘입니다)
-            </div>
-          </div>
-          
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">3</span>
-              홈 화면에 추가 선택
-            </div>
-            <div class="step-desc">
-              나타나는 메뉴에서 <span class="step-icon">➕</span> <strong>"홈 화면에 추가"</strong>를 선택해주세요.<br>
-              (아래로 스크롤해야 보일 수 있습니다)
-            </div>
-          </div>
-          
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">4</span>
-              추가 완료
-            </div>
-            <div class="step-desc">
-              오른쪽 상단의 <strong>"추가"</strong> 버튼을 탭하면<br>
-              홈 화면에 U+One 사용 가이드 아이콘이 생성됩니다! 🎉
-            </div>
-          </div>
-        `;
-      } else {
-        modalTitle.textContent = '🤖 Android 홈 화면에 추가';
-        modalBody.innerHTML = `
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">1</span>
-              Chrome 브라우저 열기
-            </div>
-            <div class="step-desc">
-              Android에서 <strong>Chrome 브라우저</strong>로 이 페이지를 열어주세요.<br>
-              (Samsung Internet 등 다른 브라우저에서도 유사하게 작동합니다)
-            </div>
-          </div>
-          
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">2</span>
-              메뉴 버튼 탭하기
-            </div>
-            <div class="step-desc">
-              화면 오른쪽 상단의 <span class="step-icon">⋮</span> <strong>점 3개 메뉴</strong>를 탭해주세요.
-            </div>
-          </div>
-          
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">3</span>
-              홈 화면에 추가 선택
-            </div>
-            <div class="step-desc">
-              메뉴에서 <span class="step-icon">➕</span> <strong>"홈 화면에 추가"</strong> 또는<br>
-              <strong>"앱 설치"</strong>를 선택해주세요.
-            </div>
-          </div>
-          
-          <div class="install-step">
-            <div class="step-title">
-              <span class="step-number">4</span>
-              추가 완료
-            </div>
-            <div class="step-desc">
-              팝업에서 <strong>"추가"</strong> 또는 <strong>"설치"</strong> 버튼을 탭하면<br>
-              홈 화면에 U+One 사용 가이드 아이콘이 생성됩니다! 🎉
-            </div>
-          </div>
-          
-          <div class="install-step" style="border-left-color: #34A853;">
-            <div class="step-title">
-              <span class="step-number" style="background: #34A853;">💡</span>
-              Samsung Internet 사용 시
-            </div>
-            <div class="step-desc">
-              삼성 인터넷 브라우저에서는 하단 메뉴 버튼 <span class="step-icon">☰</span>을 탭한 후<br>
-              <strong>"페이지 추가 위치" → "홈 화면"</strong>을 선택하시면 됩니다.
-            </div>
-          </div>
-        `;
-      }
-      
-      modal.classList.add('show');
-    }
-
-    function closeInstallGuide() {
-      const modal = document.getElementById('install-modal');
-      modal.classList.remove('show');
-    }
-
-    document.getElementById('install-modal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeInstallGuide();
-      }
-    });
-
-    async function onConfigChange(config) {
-      const c = { ...defaultConfig, ...config };
-
-      document.getElementById('app-title').textContent = c.app_title;
-      document.getElementById('search-input').placeholder = c.search_placeholder;
-
-      document.body.style.background = c.surface_color;
-      document.getElementById('wrapper').style.background = c.background_color;
-
-      document.querySelectorAll('.section-header').forEach(el => {
-        el.style.background = `linear-gradient(135deg, ${c.primary_color}, ${c.secondary_color})`;
-      });
-
-      document.querySelectorAll('.q-mark').forEach(el => {
-        el.style.color = c.primary_color;
-      });
-
-      document.querySelectorAll('.btn:not(.btn-gray)').forEach(el => {
-        el.style.background = c.primary_color;
-      });
-
-      document.querySelectorAll('.logo').forEach(el => {
-        el.style.color = c.primary_color;
-      });
-    }
-
-    function mapToCapabilities(config) {
-      const c = { ...defaultConfig, ...config };
-      return {
-        recolorables: [
-          {
-            get: () => c.background_color,
-            set: (v) => { c.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
-          },
-          {
-            get: () => c.surface_color,
-            set: (v) => { c.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
-          },
-          {
-            get: () => c.text_color,
-            set: (v) => { c.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-          },
-          {
-            get: () => c.primary_color,
-            set: (v) => { c.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
-          },
-          {
-            get: () => c.secondary_color,
-            set: (v) => { c.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
-          }
-        ],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      const c = { ...defaultConfig, ...config };
-      return new Map([
-        ['app_title', c.app_title],
-        ['search_placeholder', c.search_placeholder]
-      ]);
-    }
-
-    initializeList();
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities,
-        mapToEditPanelValues
-      });
-    }
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d6cffc5533baa4a',t:'MTc3MjU4NjYwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    </script>
+</body>
 </html>
