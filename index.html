@@ -2,11 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LGU+ 멀티라인 견적서 (이미지 요금제 반영)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LGU+ 멀티라인 견적서 (모바일 캡쳐용)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 캡쳐를 위한 html2canvas 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
         
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -17,18 +19,7 @@
         .text-uplus { color: #E6007E; }
         .bg-uplus { background-color: #E6007E; }
         .border-uplus { border-color: #E6007E; }
-        .hover-bg-uplus:hover { background-color: #C5006C; }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: white; padding: 0; }
-            .shadow-lg { box-shadow: none !important; }
-            .print-border { border: 1px solid #ddd !important; }
-            .bg-uplus { background-color: #E6007E !important; -webkit-print-color-adjust: exact; }
-            .text-white { color: white !important; -webkit-print-color-adjust: exact; }
-            .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
-        }
-
+        
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -40,8 +31,8 @@
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
+            background-size: 1.2em 1.2em;
+            padding-right: 2rem;
         }
 
         .free-row { color: #E6007E; font-weight: bold; }
@@ -52,95 +43,108 @@
             bottom: 24px;
             right: 24px;
             z-index: 50;
-            box-shadow: 0 4px 12px rgba(230, 0, 126, 0.3);
+            box-shadow: 0 4px 14px rgba(230, 0, 126, 0.4);
             transition: all 0.2s ease;
+        }
+        .capture-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 캡쳐 영역 전용 모바일 최적화 폭 (약 430px) */
+        .mobile-container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-2 md:p-4">
 
-    <button onclick="window.print()" class="no-print capture-btn bg-uplus text-white px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+    <!-- ✅ 오른쪽 하단 플로팅 캡쳐 버튼 (캡쳐 기능 연결) -->
+    <button id="captureBtn" onclick="captureAndSave()" class="capture-btn bg-uplus text-white px-5 py-3 rounded-full flex items-center gap-2 text-sm font-bold">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
             <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
             <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
         </svg>
-        견적서 캡쳐
+        <span>견적서 캡쳐</span>
     </button>
 
-    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 print-border">
+    <!-- 캡쳐될 실제 영역 (모바일 폭 고정) -->
+    <div id="capture-area" class="mobile-container overflow-hidden border border-slate-200">
         <!-- 헤더 -->
-        <div class="bg-uplus p-8 text-white flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="bg-uplus p-5 text-white flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="20" cy="20" r="20" fill="white"/>
                     <path d="M12 15V22C12 25.3137 14.6863 28 18 28H22C25.3137 28 28 25.3137 28 22V15H25V22C25 23.6569 23.6569 25 22 25H18C16.3431 25 15 23.6569 15 22V15H12Z" fill="#E6007E"/>
                     <rect x="23" y="12" width="5" height="3" rx="1" fill="#E6007E"/>
                 </svg>
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight uppercase">LG Uplus</h1>
-                    <p class="text-pink-100 text-xs opacity-80 uppercase tracking-widest">Business Solution Estimate</p>
+                    <h1 class="text-lg font-black tracking-tight uppercase leading-tight">LG Uplus</h1>
+                    <p class="text-[9px] text-pink-100 opacity-90 uppercase tracking-widest leading-none mt-0.5">Business Estimate</p>
                 </div>
             </div>
             <div class="text-right">
-                <div class="flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full">
-                    <span class="text-xs text-pink-100">발행일자:</span>
-                    <input type="date" id="docDate" class="bg-transparent border-none outline-none text-white text-sm font-semibold" value="2026-04-01">
+                <div class="flex items-center gap-1.5 bg-black/15 px-2.5 py-1 rounded-md">
+                    <span class="text-[10px] text-pink-100">발행일:</span>
+                    <input type="date" id="docDate" class="bg-transparent border-none outline-none text-white text-[11px] font-bold p-0 w-[85px]" value="2026-04-01">
                 </div>
             </div>
         </div>
 
-        <div class="p-8">
-            <!-- 조건 선택 섹션 -->
-            <div class="no-print mb-10 p-7 bg-slate-50 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="md:col-span-4 border-b border-slate-200 pb-2 mb-2">
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <span class="w-1.5 h-4 bg-uplus rounded-full"></span>
-                        견적 옵션 설정 (이미지 요금제 적용)
+        <div class="p-4">
+            <!-- 조건 선택 섹션 (모바일 최적화 2단 그리드) -->
+            <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-2 gap-3" data-html2canvas-ignore="false">
+                <div class="col-span-2 border-b border-slate-200 pb-2 mb-1">
+                    <h2 class="text-[13px] font-bold text-slate-800 flex items-center gap-1.5">
+                        <span class="w-1 h-3 bg-uplus rounded-full"></span>
+                        견적 옵션 설정 (이미지 요금제)
                     </h2>
                 </div>
                 
-                <div class="col-span-1">
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">약정 기간</label>
-                    <select id="contract" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">약정 기간</label>
+                    <select id="contract" class="w-full bg-white border border-slate-200 rounded-md px-2 py-1.5 text-[11px] font-medium focus:ring-1 focus:ring-uplus outline-none">
                         <option value="3">3년 약정</option>
                         <option value="5" selected>5년 약정</option>
                     </select>
                 </div>
 
-                <div class="col-span-1">
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">인터넷 종류</label>
-                    <select id="internet" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">인터넷 종류</label>
+                    <select id="internet" class="w-full bg-white border border-slate-200 rounded-md px-2 py-1.5 text-[11px] font-medium focus:ring-1 focus:ring-uplus outline-none">
                         <option value="기가Slim" selected>기가Slim (500M)</option>
                         <option value="광랜">광랜 (100M)</option>
                         <option value="기가1G">기가 1G</option>
                     </select>
                 </div>
 
-                <div class="col-span-1">
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">TV 상품</label>
-                    <select id="tv" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">TV 상품</label>
+                    <select id="tv" class="w-full bg-white border border-slate-200 rounded-md px-2 py-1.5 text-[11px] font-medium focus:ring-1 focus:ring-uplus outline-none">
                         <option value="기본형" selected>기본형 (223개)</option>
                         <option value="실속형">실속형 (217개)</option>
                     </select>
                 </div>
 
-                <div class="col-span-1">
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">총 회선수 (TV)</label>
-                    <input type="number" id="tvTotal" value="15" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-uplus outline-none shadow-sm font-bold text-uplus">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 text-uplus">총 회선수 (TV)</label>
+                    <input type="number" id="tvTotal" value="15" class="w-full bg-white border border-slate-200 rounded-md px-2 py-1.5 text-[12px] font-bold text-uplus focus:ring-1 focus:ring-uplus outline-none">
                 </div>
 
-                <div class="md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-200 pt-4 mt-2">
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" id="freeWifi" class="w-4 h-4 accent-uplus cursor-pointer" checked>
-                        <label for="freeWifi" class="text-xs text-slate-600 cursor-pointer font-bold text-uplus">WIFI 무료 정책 적용</label>
+                <div class="col-span-2 grid grid-cols-2 gap-2 border-t border-slate-200 pt-3 mt-1">
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="freeWifi" class="w-3.5 h-3.5 accent-uplus" checked>
+                        <label for="freeWifi" class="text-[10px] text-slate-700 font-bold">WIFI 무료 적용</label>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" id="freeUHD3" class="w-4 h-4 accent-uplus cursor-pointer" checked>
-                        <label for="freeUHD3" class="text-xs text-slate-600 cursor-pointer font-bold text-uplus">UHD3셋탑 무료 정책 적용</label>
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="freeUHD3" class="w-3.5 h-3.5 accent-uplus" checked>
+                        <label for="freeUHD3" class="text-[10px] text-slate-700 font-bold">UHD3셋탑 무료</label>
                     </div>
-                    <div class="col-span-2">
-                        <label class="inline-block text-[11px] font-bold text-slate-400 uppercase mb-1 mr-2">시설/상품권 기준:</label>
-                        <select id="facility" class="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs focus:ring-2 focus:ring-uplus outline-none">
+                    <div class="col-span-2 mt-1">
+                        <label class="inline-block text-[10px] font-bold text-slate-400 mr-2">상품권 기준:</label>
+                        <select id="facility" class="bg-white border border-slate-200 rounded-md px-2 py-1 text-[11px] focus:ring-1 focus:ring-uplus outline-none">
                             <option value="모텔">모텔</option>
                             <option value="원룸">원룸</option>
                         </select>
@@ -149,113 +153,106 @@
             </div>
 
             <!-- 요금 상세 내역 -->
-            <div class="mb-4 flex justify-between items-end">
-                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <div class="mb-3 flex justify-between items-end px-1">
+                <h3 class="text-[15px] font-bold text-slate-800 flex items-center gap-1.5">
                     ■ 요금
-                    <span class="text-xs font-normal text-slate-400 ml-2">| 총회선수: <span id="displayTotalLines" class="font-bold text-uplus">15</span></span>
+                    <span class="text-[11px] font-normal text-slate-500 ml-1">총 <span id="displayTotalLines" class="font-bold text-uplus">15</span>회선</span>
                 </h3>
-                <span class="text-xs text-slate-400">단위: 원 (VAT 별도)</span>
+                <span class="text-[9px] text-slate-400">단위: 원(VAT별도)</span>
             </div>
 
-            <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm mb-8">
-                <table class="w-full text-sm text-left border-collapse">
-                    <thead class="text-[11px] text-slate-600 uppercase bg-slate-50 border-b border-slate-300">
+            <!-- 모바일 표 (상품명과 규격을 합쳐 공간 절약) -->
+            <div class="border-y border-slate-300 mb-6 w-full">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-300">
                         <tr>
-                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-32">구분</th>
-                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-40">상품명</th>
-                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300">규격 및 사양</th>
-                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-24">수량 (입력)</th>
-                            <th class="px-4 py-3 font-bold text-center border-r border-slate-300 w-32">단가금액</th>
-                            <th class="px-4 py-3 font-bold text-center w-36">최종금액</th>
+                            <th class="px-1 py-2 font-bold text-center border-r border-slate-200 text-[10px] text-slate-600 w-[16%]">구분</th>
+                            <th class="px-2 py-2 font-bold text-center border-r border-slate-200 text-[10px] text-slate-600 w-[35%]">상품명 / 규격</th>
+                            <th class="px-1 py-2 font-bold text-center border-r border-slate-200 text-[10px] text-slate-600 w-[12%]">수량</th>
+                            <th class="px-1 py-2 font-bold text-center border-r border-slate-200 text-[10px] text-slate-600 w-[17%]">단가</th>
+                            <th class="px-1 py-2 font-bold text-center text-[10px] text-slate-600 w-[20%]">최종금액</th>
                         </tr>
                     </thead>
-                    <tbody id="priceTable" class="divide-y divide-slate-200 text-slate-700">
+                    <tbody id="priceTable" class="divide-y divide-slate-200">
                         <!-- JS에서 데이터 렌더링 -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- 하단 정보 영역: 사은품/특이사항 및 합계 -->
-            <div class="mt-12 grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+            <!-- 하단 정보 영역: 사은품/특이사항 및 합계 (모바일에서는 세로 배치) -->
+            <div class="flex flex-col gap-5">
                 
-                <!-- 왼쪽: 사은품 및 특이사항 -->
-                <div class="md:col-span-7 flex flex-col">
-                    <div class="border-t-2 border-slate-800 pt-4 mb-2">
-                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            ■ 사은품 및 특이사항
-                        </h3>
-                    </div>
-                    <div class="flex-grow p-5 bg-slate-50 rounded-xl border border-slate-200">
-                        <p id="contractBasis" class="text-sm font-bold text-slate-800 border-b border-slate-300 pb-2 mb-4">5년 약정 기준</p>
-                        <ul class="text-xs text-slate-700 space-y-3 mb-6">
-                            <li class="flex items-start gap-2">
-                                <span class="text-uplus font-bold mt-0.5">•</span>
-                                <span>LG유플러스 광케이블 공사료 및 설치비 전액 면제 (최소 200만원)</span>
+                <!-- 사은품 및 특이사항 -->
+                <div>
+                    <h3 class="text-[14px] font-bold text-slate-900 flex items-center gap-1.5 mb-2 px-1">
+                        ■ 사은품 및 특이사항
+                    </h3>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <p id="contractBasis" class="text-[11px] font-bold text-slate-800 border-b border-slate-300 pb-1.5 mb-2.5">5년 약정 기준</p>
+                        <ul class="text-[10px] text-slate-700 space-y-1.5 mb-4 leading-tight">
+                            <li class="flex items-start gap-1">
+                                <span class="text-uplus font-bold">•</span>
+                                <span>LG유플러스 광케이블 공사료/설치비 전액 면제 (최소 200만)</span>
                             </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-uplus font-bold mt-0.5">•</span>
+                            <li class="flex items-start gap-1">
+                                <span class="text-uplus font-bold">•</span>
                                 <span>넷플릭스 지원가능한 UHD 셋탑 무료 정책 적용</span>
                             </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-uplus font-bold mt-0.5">•</span>
+                            <li class="flex items-start gap-1">
+                                <span class="text-uplus font-bold">•</span>
                                 <span>통합리모컨 객실 당 제공</span>
                             </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-uplus font-bold mt-0.5">•</span>
+                            <li class="flex items-start gap-1">
+                                <span class="text-uplus font-bold">•</span>
                                 <span>전 객실 기가와이파이 제공 및 본사 AS 가능</span>
                             </li>
                         </ul>
                         
-                        <div class="mt-auto pt-6 border-t border-slate-200">
-                            <div class="flex flex-col gap-1">
-                                <span class="text-sm font-bold text-slate-800 uppercase tracking-tighter">LG U+ 특별 지원금</span>
-                                <div class="flex items-baseline gap-1">
-                                    <span id="voucherTotal" class="text-3xl font-black text-red-600">0</span>
-                                    <span class="text-lg font-bold text-red-600">원</span>
-                                    <span class="text-[11px] text-slate-500 font-medium ml-2 tracking-tight">지급 (신세계 or 홈플러스 상품권)</span>
+                        <div class="pt-3 border-t border-slate-200">
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-slate-800 uppercase mb-0.5">LG U+ 특별 지원금</span>
+                                <div class="flex items-baseline justify-between">
+                                    <div class="flex items-baseline gap-0.5">
+                                        <span id="voucherTotal" class="text-xl font-black text-red-600 tracking-tight">0</span>
+                                        <span class="text-sm font-bold text-red-600">원</span>
+                                    </div>
+                                    <span class="text-[9px] text-slate-500 font-medium">지급(신세계/홈플러스)</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 오른쪽: 합계 영역 -->
-                <div class="md:col-span-5 flex flex-col">
-                    <div class="border-t-2 border-slate-800 pt-4 mb-2">
-                         <h3 class="text-lg font-bold text-slate-900">■ 총 합계 요금</h3>
+                <!-- 합계 영역 -->
+                <div class="bg-slate-800 p-5 rounded-xl text-white shadow-lg">
+                    <h3 class="text-[13px] font-bold text-pink-200 border-b border-white/20 pb-2 mb-3">■ 총 합계 요금</h3>
+                    
+                    <div class="flex justify-between items-center py-1.5">
+                        <span class="text-slate-300 text-[11px] font-medium">월 이용료 (VAT 별도)</span>
+                        <span id="subtotal" class="text-[13px] font-bold tracking-wide">0</span>
                     </div>
-                    <div class="flex-grow bg-slate-800 p-8 rounded-xl text-white shadow-lg flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center py-3 border-b border-white/10 mb-4">
-                                <span class="text-slate-400 text-sm font-medium">월 이용료 (VAT 별도)</span>
-                                <span id="subtotal" class="text-xl font-bold">0</span>
-                            </div>
-                            <div class="flex justify-between items-center py-3 border-b border-white/10">
-                                <span class="text-slate-400 text-sm font-medium">부가가치세 (10%)</span>
-                                <span id="vatTotal" class="text-xl font-bold">0</span>
-                            </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-white/10 mb-3 pb-3">
+                        <span class="text-slate-300 text-[11px] font-medium">부가가치세 (10%)</span>
+                        <span id="vatTotal" class="text-[13px] font-bold tracking-wide">0</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-end mt-2">
+                        <div class="flex flex-col">
+                            <span class="inline-block bg-uplus text-white text-[9px] px-1.5 py-0.5 rounded font-bold w-max mb-1">VAT 포함</span>
+                            <span class="text-[12px] font-bold text-slate-200">최종 월 납부액</span>
                         </div>
-                        
-                        <div class="mt-8">
-                            <div class="text-right mb-2">
-                                <span class="inline-block bg-uplus text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">VAT 포함 총 납부액</span>
-                            </div>
-                            <div class="flex justify-between items-end">
-                                <span class="text-sm font-medium text-slate-400 mb-2">최종금액</span>
-                                <div class="text-right">
-                                    <span id="total" class="text-5xl font-black text-white tracking-tighter">0</span>
-                                    <span class="text-lg font-bold text-pink-400 ml-1">원</span>
-                                </div>
-                            </div>
+                        <div class="text-right">
+                            <span id="total" class="text-3xl font-black text-white tracking-tighter">0</span>
+                            <span class="text-[13px] font-bold text-pink-400 ml-0.5">원</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-slate-50 border-t border-slate-100 p-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-slate-400">
+        <div class="bg-slate-100 border-t border-slate-200 p-4 text-center text-[9px] text-slate-400">
             <p>© LG Uplus Corp. All rights reserved.</p>
-            <p class="font-medium text-slate-500">본 견적서는 상담용이며, 실제 개통 환경에 따라 변동될 수 있습니다.</p>
+            <p class="mt-0.5">본 견적서는 상담용이며, 개통 환경에 따라 변동될 수 있습니다.</p>
         </div>
     </div>
 
@@ -263,9 +260,9 @@
         const priceDB = {
             "3": {
                 internet: {
-                    "광랜": { price: 25000, desc: "100Mbps 속도의 광랜망의 기본 서비스" },
-                    "기가Slim": { price: 30000, desc: "500Mbps 기가속도의 안정적인 서비스" },
-                    "기가1G": { price: 35000, desc: "1Gbps 기가속도의 가장 빠른 서비스" }
+                    "광랜": { price: 25000, desc: "100Mbps 광랜 기본 서비스" },
+                    "기가Slim": { price: 30000, desc: "500Mbps 기가속도 안정적 서비스" },
+                    "기가1G": { price: 35000, desc: "1Gbps 기가속도 가장 빠른 서비스" }
                 },
                 tv: {
                     "실속형": { main: 12000, sub: 7000, desc: "217개 채널" },
@@ -274,9 +271,9 @@
             },
             "5": {
                 internet: {
-                    "광랜": { price: 20000, desc: "100Mbps 속도의 광랜망의 기본 서비스" },
-                    "기가Slim": { price: 25000, desc: "500Mbps 기가속도의 안정적인 서비스" },
-                    "기가1G": { price: 30000, desc: "1Gbps 기가속도의 가장 빠른 서비스" }
+                    "광랜": { price: 20000, desc: "100Mbps 광랜 기본 서비스" },
+                    "기가Slim": { price: 25000, desc: "500Mbps 기가속도 안정적 서비스" },
+                    "기가1G": { price: 30000, desc: "1Gbps 기가속도 가장 빠른 서비스" }
                 },
                 tv: {
                     "실속형": { main: 10000, sub: 6000, desc: "217개 채널" },
@@ -284,9 +281,9 @@
                 }
             },
             equipment: {
-                "WIFI": { price: 1000, desc: "보안이 강화된 정품 통합형 WIFI (무료정책)" },
-                "구글셋탑": { price: 1000, desc: "국내최초 구글이 들어간 셋탑" },
-                "UHD3셋탑": { price: 3000, desc: "UHD화질과 넷플릭스, 유튜브 등 OTT 지원" }
+                "WIFI": { price: 1000, desc: "정품 통합형 WIFI (무료정책)" },
+                "구글셋탑": { price: 1000, desc: "구글 셋탑박스" },
+                "UHD3셋탑": { price: 3000, desc: "UHD화질/넷플릭스 등 OTT 지원" }
             },
             voucherDB: {
                 "3": {
@@ -324,35 +321,54 @@
 
             let subtotal = 0;
 
+            // 모바일 뷰어용 행 생성기 (상품명과 규격 합침)
+            function createMobileRow(category, productName, spec, qty, unitPrice, amount, isFree = false) {
+                const amountStr = isFree ? `<span class="free-row">무료</span>` : amount.toLocaleString();
+                return `
+                    <tr>
+                        <td class="px-1 py-2.5 text-center border-r border-slate-200 text-slate-500 text-[9px] leading-[1.1] tracking-tighter break-keep">
+                            ${category.replace(' ', '<br>')}
+                        </td>
+                        <td class="px-2 py-2.5 border-r border-slate-200">
+                            <div class="font-bold text-slate-800 text-[11px] tracking-tight">${productName}</div>
+                            <div class="text-slate-500 text-[9px] mt-0.5 leading-tight tracking-tighter">${spec}</div>
+                        </td>
+                        <td class="px-1 py-2.5 text-center border-r border-slate-200 font-bold text-slate-800 text-[11px]">${qty.toLocaleString()}</td>
+                        <td class="px-1 py-2.5 text-right border-r border-slate-200 text-slate-600 font-medium text-[10px] tracking-tighter">${unitPrice.toLocaleString()}</td>
+                        <td class="px-1 py-2.5 text-right font-bold text-slate-900 text-[11px] tracking-tighter whitespace-nowrap">${amountStr}</td>
+                    </tr>
+                `;
+            }
+
             // 1. 인터넷
             const internetData = priceDB[contract].internet[internetType];
             const internetAmount = internetQty * internetData.price;
             subtotal += internetAmount;
-            tbody.innerHTML += createRow(`멀티라인(1:8) ${contract}년`, `${internetType} 인터넷`, internetData.desc, internetQty, internetData.price, internetAmount);
+            tbody.innerHTML += createMobileRow(`멀티라인(1:8) ${contract}년`, `${internetType} 인터넷`, internetData.desc, internetQty, internetData.price, internetAmount);
 
             // 2. TV 주
             const tvData = priceDB[contract].tv[tvType];
             const tvMainAmount = tvMainQty * tvData.main;
             subtotal += tvMainAmount;
-            tbody.innerHTML += createRow(`멀티라인(1:8) ${contract}년`, `${tvType} / 주`, tvData.desc, tvMainQty, tvData.main, tvMainAmount);
+            tbody.innerHTML += createMobileRow(`멀티라인(1:8) ${contract}년`, `${tvType} / 주`, tvData.desc, tvMainQty, tvData.main, tvMainAmount);
 
             // 3. TV 부
             const tvSubAmount = tvSubQty * tvData.sub;
             subtotal += tvSubAmount;
-            tbody.innerHTML += createRow(`멀티라인(1:8) ${contract}년`, `${tvType} / 부`, tvData.desc, tvSubQty, tvData.sub, tvSubAmount);
+            tbody.innerHTML += createMobileRow(`멀티라인(1:8) ${contract}년`, `${tvType} / 부`, tvData.desc, tvSubQty, tvData.sub, tvSubAmount);
 
             // 4. 장비
             const wifiData = priceDB.equipment["WIFI"];
             let wifiAmount = internetQty * wifiData.price;
             if (freeWifi) wifiAmount = 0; 
             subtotal += wifiAmount;
-            tbody.innerHTML += createRow(`장비 3년약정`, `WIFI`, wifiData.desc, internetQty, wifiData.price, wifiAmount, freeWifi);
+            tbody.innerHTML += createMobileRow(`장비 3년약정`, `WIFI`, wifiData.desc, internetQty, wifiData.price, wifiAmount, freeWifi);
 
             const settopData = priceDB.equipment["UHD3셋탑"];
             let settopAmount = tvTotal * settopData.price;
             if (freeUHD3) settopAmount = 0; 
             subtotal += settopAmount;
-            tbody.innerHTML += createRow(`장비 3년약정`, `UHD3셋탑`, settopData.desc, tvTotal, settopData.price, settopAmount, freeUHD3);
+            tbody.innerHTML += createMobileRow(`장비 3년약정`, `UHD3셋탑`, settopData.desc, tvTotal, settopData.price, settopAmount, freeUHD3);
 
             const vat = Math.floor(subtotal * 0.1);
             const grandTotal = subtotal + vat;
@@ -366,18 +382,50 @@
             document.getElementById('voucherTotal').innerText = totalVoucher.toLocaleString();
         }
 
-        function createRow(category, productName, spec, qty, unitPrice, amount, isFree = false) {
-            const amountStr = isFree ? `<span class="free-row">무료</span>` : amount.toLocaleString();
-            return `
-                <tr>
-                    <td class="px-4 py-4 text-center border-r border-slate-200 text-slate-500 text-[10px] leading-tight">${category}</td>
-                    <td class="px-4 py-4 border-r border-slate-200 font-bold text-slate-700">${productName}</td>
-                    <td class="px-4 py-4 border-r border-slate-200 text-slate-500 text-[10px] leading-relaxed">${spec}</td>
-                    <td class="px-4 py-4 text-center border-r border-slate-200 font-bold text-slate-800">${qty.toLocaleString()}</td>
-                    <td class="px-4 py-4 text-right border-r border-slate-200 text-slate-600 font-medium">${unitPrice.toLocaleString()}</td>
-                    <td class="px-4 py-4 text-right font-bold text-slate-900">${amountStr}</td>
-                </tr>
-            `;
+        // html2canvas를 이용한 모바일 화면 캡쳐 및 이미지 저장 함수
+        async function captureAndSave() {
+            const captureArea = document.getElementById('capture-area');
+            const btn = document.getElementById('captureBtn');
+            const originalHTML = btn.innerHTML;
+            
+            try {
+                // 버튼 상태 변경 (로딩 표시)
+                btn.innerHTML = '<span class="animate-pulse">캡쳐 처리 중...</span>';
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.8';
+
+                // html2canvas 렌더링
+                const canvas = await html2canvas(captureArea, {
+                    scale: 2, // 모바일 레티나 디스플레이 대비 2배수 고화질
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    windowWidth: captureArea.scrollWidth,
+                    windowHeight: captureArea.scrollHeight
+                });
+
+                const imageURI = canvas.toDataURL('image/png');
+                
+                // 파일명 생성 (예: LGUplus_견적서_20260401.png)
+                const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const fileName = `LGUplus_견적서_${dateStr}.png`;
+
+                // 모바일 기기를 위한 다운로드 트리거
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = imageURI;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch (error) {
+                console.error('캡쳐 오류:', error);
+                alert('캡쳐 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
+            } finally {
+                // 버튼 상태 복구
+                btn.innerHTML = originalHTML;
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
